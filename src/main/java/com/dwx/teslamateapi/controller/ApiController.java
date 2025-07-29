@@ -2,12 +2,14 @@ package com.dwx.teslamateapi.controller;
 
 import cn.hutool.core.util.CoordinateUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
@@ -46,9 +48,28 @@ public class ApiController {
         location.set("latitude", coordinate.getLat());
         location.set("longitude", coordinate.getLng());
 
-        log.info("{},{}", latitude, longitude);
+//        log.info("{},{}", latitude, longitude);
 
-        log.info(JSONUtil.toJsonStr(json));
+//        log.info(JSONUtil.toJsonStr(json));
+        return JSONUtil.toJsonStr(json);
+    }
+
+    @ResponseBody
+    @GetMapping(value = {"/api/v1/cars/1/drives/{id}"})
+    public String drives(HttpServletRequest request, @PathVariable Integer id) {
+        log.info("id:{}", id);
+        log.info(request.getRequestURI());
+        String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        JSONObject json = JSONUtil.parseObj(res);
+        JSONArray jsonArray = json.getJSONObject("data").getJSONObject("drive").getJSONArray("drive_details");
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject drive_detail = jsonArray.getJSONObject(i);
+            BigDecimal latitude = drive_detail.getBigDecimal("latitude");
+            BigDecimal longitude = drive_detail.getBigDecimal("longitude");
+            CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(longitude.doubleValue(), latitude.doubleValue());
+            drive_detail.set("latitude", coordinate.getLat());
+            drive_detail.set("longitude", coordinate.getLng());
+        }
         return JSONUtil.toJsonStr(json);
     }
 }
