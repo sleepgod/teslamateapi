@@ -66,4 +66,37 @@ public class ApiController {
         }
         return JSONUtil.toJsonStr(json);
     }
+
+    @ResponseBody
+    @GetMapping(value = {"/api/v1/cars/{car_id}/charges"})
+    public String charges(HttpServletRequest request) {
+        log.info(request.getRequestURI());
+        String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        JSONObject json = JSONUtil.parseObj(res);
+        JSONArray jsonArray = json.getJSONObject("data").getJSONArray("charges");
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject charge = jsonArray.getJSONObject(i);
+            BigDecimal latitude = charge.getBigDecimal("latitude");
+            BigDecimal longitude = charge.getBigDecimal("longitude");
+            CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(longitude.doubleValue(), latitude.doubleValue());
+            charge.set("latitude", coordinate.getLat());
+            charge.set("longitude", coordinate.getLng());
+        }
+        return JSONUtil.toJsonStr(json);
+    }
+
+    @ResponseBody
+    @GetMapping(value = {"/api/v1/cars/{car_id}/charges/{id}"})
+    public String charge(HttpServletRequest request) {
+        log.info(request.getRequestURI());
+        String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        JSONObject json = JSONUtil.parseObj(res);
+        JSONObject charge = json.getJSONObject("data").getJSONObject("charge");
+        BigDecimal latitude = charge.getBigDecimal("latitude");
+        BigDecimal longitude = charge.getBigDecimal("longitude");
+        CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(longitude.doubleValue(), latitude.doubleValue());
+        charge.set("latitude", coordinate.getLat());
+        charge.set("longitude", coordinate.getLng());
+        return JSONUtil.toJsonStr(json);
+    }
 }
