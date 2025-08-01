@@ -20,15 +20,21 @@ public class ApiController {
     @ResponseBody
     @GetMapping(value = {"**"})
     public String hello(HttpServletRequest request) {
-        log.info(request.getRequestURI());
-        return HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+//        log.info(request.getRequestURI());
+        long t = System.currentTimeMillis();
+        String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
+        return res;
     }
 
     @ResponseBody
     @GetMapping(value = {"/api/v1/cars/{car_id}/status"})
     public String status(HttpServletRequest request) {
-        log.info(request.getRequestURI());
+//        log.info(request.getRequestURI());
+        long t = System.currentTimeMillis();
         String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
+
         JSONObject json = JSONUtil.parseObj(res);
         JSONObject car_geodata = json.getJSONObject("data").getJSONObject("status").getJSONObject("car_geodata");
 
@@ -45,15 +51,18 @@ public class ApiController {
         JSONObject location = car_geodata.getJSONObject("location");
         location.set("latitude", coordinate.getLat());
         location.set("longitude", coordinate.getLng());
-
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
         return JSONUtil.toJsonStr(json);
     }
 
     @ResponseBody
     @GetMapping(value = {"/api/v1/cars/{car_id}/drives/{id}"})
     public String drives(HttpServletRequest request) {
-        log.info(request.getRequestURI());
+//        log.info(request.getRequestURI());
+        long t = System.currentTimeMillis();
         String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
+
         JSONObject json = JSONUtil.parseObj(res);
         JSONArray jsonArray = json.getJSONObject("data").getJSONObject("drive").getJSONArray("drive_details");
         for (int i = 0; i < jsonArray.size(); i++) {
@@ -64,14 +73,18 @@ public class ApiController {
             drive_detail.set("latitude", coordinate.getLat());
             drive_detail.set("longitude", coordinate.getLng());
         }
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
         return JSONUtil.toJsonStr(json);
     }
 
     @ResponseBody
     @GetMapping(value = {"/api/v1/cars/{car_id}/charges"})
     public String charges(HttpServletRequest request) {
-        log.info(request.getRequestURI());
+//        log.info(request.getRequestURI());
+        long t = System.currentTimeMillis();
         String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
+
         JSONObject json = JSONUtil.parseObj(res);
         JSONArray jsonArray = json.getJSONObject("data").getJSONArray("charges");
         for (int i = 0; i < jsonArray.size(); i++) {
@@ -82,14 +95,18 @@ public class ApiController {
             charge.set("latitude", coordinate.getLat());
             charge.set("longitude", coordinate.getLng());
         }
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
         return JSONUtil.toJsonStr(json);
     }
 
     @ResponseBody
     @GetMapping(value = {"/api/v1/cars/{car_id}/charges/{id}"})
     public String charge(HttpServletRequest request) {
-        log.info(request.getRequestURI());
+//        log.info(request.getRequestURI());
+        long t = System.currentTimeMillis();
         String res = HttpUtil.get("http://192.168.5.254:8081" + request.getRequestURI());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
+
         JSONObject json = JSONUtil.parseObj(res);
         JSONObject charge = json.getJSONObject("data").getJSONObject("charge");
         BigDecimal latitude = charge.getBigDecimal("latitude");
@@ -97,6 +114,7 @@ public class ApiController {
         CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(longitude.doubleValue(), latitude.doubleValue());
         charge.set("latitude", coordinate.getLat());
         charge.set("longitude", coordinate.getLng());
+        log.info("{},{}", request.getRequestURI(), System.currentTimeMillis() - t);
         return JSONUtil.toJsonStr(json);
     }
 }
